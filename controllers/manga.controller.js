@@ -13,7 +13,6 @@ class MangaController {
             const { name, description, price, genres } = req.body;
             const mangaModel = await this.models.Manga.create({ name, description, price });
             const promises = genres.map((genre) => { return { genre_name: genre } }).map(genre => this.models.Genre.findOrCreate({ where: genre }));
-
             const genresFindOrCreate = await Promise.all(promises);
             const genresModels = genresFindOrCreate.map(([genre, create]) => { return genre });
             await mangaModel.addGenres(genresModels);
@@ -61,12 +60,18 @@ class MangaController {
     updateManga = async (req, res) => {
         try {
             const { name, description, price, genres } = req.body;
-            await this.models.Manga.update({ name, description, price }, { where: { id: req.params.id } });
+            const mangaModel = await this.models.Manga.findByPk(req.params.id);
+            await mangaModel.update({ name, description, price }, { where: { id: req.params.id } });
+            mangaModel.setGenres([]);
+
+            const promises = genres.map((genre) => { return { genre_name: genre } }).map(genre => this.models.Genre.findOrCreate({ where: genre }));
+            const genresFindOrCreate = await Promise.all(promises);
+            const genresModels = genresFindOrCreate.map(([genre, create]) => { return genre });
+            await mangaModel.addGenres(genresModels);
 
             console.log('Обновление манги');
             res.json({ message: 'Манга успешно обновлена' });
         } catch (err) {
-            console.log('Ошибка ', err);
             res.json(err);
         }
     }
@@ -78,7 +83,6 @@ class MangaController {
             console.log('Удаление манги');
             res.json({ message: 'Манга успешно удалена' });
         } catch (err) {
-            console.log('Ошибка ', err);
             res.json(err);
         }
     }

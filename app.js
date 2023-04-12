@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const jwtMiddleware = require('./middlewares/jwt.midlewaew');
+const jwtMiddleware = require('./middlewares/jwt.middleware');
 const mangaRouter = require('./routes/manga.router');
 const userRouter = require('./routes/user.router');
 const Sequelize = require('sequelize');
